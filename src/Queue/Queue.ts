@@ -64,6 +64,7 @@ export default class Queue extends EventEmitter {
         }
 
         const track = new Track(query, channel, user);
+        await track.load();
         this.tracks.push(track);
         if (!this.current) this.current = this.tracks.shift();
         this.emit("addedTrack", track);

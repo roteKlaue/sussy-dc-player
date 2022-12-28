@@ -15,11 +15,13 @@ export default class Track {
         this.url = url;
         this.channel = channel;
         this.author = author;
-        video_basic_info(url).then((info) => {
-            this.title = info.video_details.title;
-            this.durationPretty = info.video_details.durationRaw;
-            this.thumbnail = info.video_details.thumbnails[info.video_details.thumbnails.length - 1];
-            this.durationMilliseconds = info.video_details.durationInSec * 1000;
-        });
+    }
+
+    async load () {
+        const info = await video_basic_info(this.url);
+        this.title = info.video_details.title;
+        this.durationPretty = info.video_details.durationRaw;
+        this.thumbnail = info.video_details.thumbnails[info.video_details.thumbnails.length - 1];
+        this.durationMilliseconds = info.video_details.durationInSec * 1000;
     }
 }

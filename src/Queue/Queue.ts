@@ -111,4 +111,8 @@ export default class Queue extends EventEmitter {
     clearQueue() {
         this.tracks.clear();
     }
+
+    shuffle() {
+        this.tracks.shuffle();
+    }
 }

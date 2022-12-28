@@ -8,7 +8,7 @@ import channelEmpty from "./Util/channelEmpty";
 export default class Player extends EventEmitter {
     private readonly queues: Collection<string, Queue> = new Collection<string, Queue>();
     private readonly client: Client;
-    private readonly options: PlayerOptions;;
+    private readonly options: PlayerOptions;
 
     constructor(options: PlayerOptions) {
         super();
@@ -103,5 +103,13 @@ export default class Player extends EventEmitter {
 
     public stop(queue: Queue) {
         queue.destroy("🖐 | Leaving channel.");
+    }
+
+    public shuffle(queue: Queue) {
+        queue.shuffle();
+    }
+
+    public clearQueue(queue: Queue) {
+        queue.clearQueue();
     }
 }

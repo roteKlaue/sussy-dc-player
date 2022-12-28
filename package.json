@@ -1,6 +1,6 @@
 {
   "name": "sussy-dc-player",
-  "version": "1.0.1-dev-beta.0.2.3.9599",
+  "version": "1.0.1-dev-beta.0.2.7.2857",
   "description": "",
   "main": "./build/index.js",
   "scripts": {
@@ -16,7 +16,7 @@
     "youtube",
     "youtube-dl"
   ],
-  "author": "",
+  "author": "roteKlaue",
   "license": "ISC",
   "dependencies": {
     "@discordjs/voice": "^0.14.0",

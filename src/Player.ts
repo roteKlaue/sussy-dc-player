@@ -3,15 +3,18 @@ import EventEmitter from "node:events";
 import { Client, Collection, Events, Guild, IntentsBitField, TextChannel, User, VoiceChannel, VoiceState } from "discord.js";
 import Queue from "./Queue/Queue";
 import { IsSomething } from "sussyutilbyraphaelbader";
+import channelEmpty from "./Util/channelEmpty";
 
 export default class Player extends EventEmitter {
     private readonly queues: Collection<string, Queue> = new Collection<string, Queue>();
     private readonly client: Client;
+    private readonly options: PlayerOptions;;
 
     constructor(options: PlayerOptions) {
         super();
 
         this.client = options.client;
+        this.options = options;
 
         if (this.client?.options?.intents && !new IntentsBitField(this.client?.options?.intents).has(IntentsBitField.Flags.GuildVoiceStates)) {
             throw new Error('client is missing "GuildVoiceStates" intent.');
@@ -25,7 +28,26 @@ export default class Player extends EventEmitter {
     }
 
     private _handleVoiceStateChange(oldState: VoiceState, newState: VoiceState): void {
+        if (!oldState.guild || !this.queues.has(oldState.guild.id)) return;
+        const queue = this.queues.get(oldState.guild.id);
 
+        if (!queue || !oldState.channelId) {
+            return;
+        }
+
+        if (oldState.id !== this.client.user?.id) {
+            if (channelEmpty(this.client, oldState.channelId) && this.options.leaveIfEmpty) {
+                queue.destroy("Leaving channel because it is empty.");
+            }
+            return;
+        }
+        if (!newState.channelId) {
+            queue.destroy("I have been kicked from the channel.");
+        }
+
+        if (oldState.channelId !== newState.channelId && newState.channelId) {
+            queue.voiceChannel = newState.channelId;
+        }
     }
 
     public createQueue(guild: Guild, voiceChannel: VoiceChannel): Queue {
@@ -39,17 +61,20 @@ export default class Player extends EventEmitter {
         const queue = new Queue(guild, voiceChannel.id, this.client);
         this.queues.set(guild.id, queue);
 
-
-        const events = ["skipped", "paused", "resumed", "error", "trackStart", "trackEnd", "queueEmpty", "addedTrack", "removedTrack", "noTrackFound"];
+        const events = ["skipped", "paused", "resumed", "error", "trackStart", "trackEnd", "addedTrack", "removedTrack", "noTrackFound"];
 
         events.forEach(event => {
             queue.on(event, (...args) =>
                 this.emit(event, queue, ...args));
         });
 
-        queue.on("destroyed", (track) => {
+        queue.on("queueEmpty", () => {
+            if (this.options.leaveOnFinished) queue.destroy("Finished playing all tracks.");
+        });
+
+        queue.on("destroyed", (track, reason) => {
             this.queues.delete(queue.guildId);
-            this.emit("leaving", queue, track);
+            this.emit("leaving", queue, track, reason);
         });
 
         return queue;

@@ -12,10 +12,11 @@ export default class Queue extends EventEmitter {
     private readonly connection: VoiceConnection;
     public readonly guildId: string;
     private loop = false;
-    private voiceChannel: string;
+    public voiceChannel: string;
     private player: CustomPlayer;
-    private current: Track | undefined;
+    public current: Track | undefined;
     private playing: boolean = false;
+    private destroyed: boolean = false;
 
     constructor(guild: Guild, voiceChannel: string, client: Client) {
         super();
@@ -65,24 +66,22 @@ export default class Queue extends EventEmitter {
         const track = new Track(query, channel, user);
         this.tracks.push(track);
         if (!this.current) this.current = this.tracks.shift();
-        console.log(this.tracks, this.current);
         this.emit("addedTrack", track);
     }
 
     getCurrent(): Track | undefined {
-        this.emit("trackStart", this.current);
         this.playing = true;
-        console.log(this.tracks, this.current);
         return this.current;
     }
 
     finished(): void {
         this.emit("trackEnd", this.current);
         if (this.loop && this.current) this.tracks.push(this.current);
+        const temp = this.current;
         this.current = this.tracks.shift();
         this.playing = false;
-        console.log(this.tracks, this.current);
         if (!this.current) {
+            this.current = temp;
             this.emit("queueEmpty");
         }
     }
@@ -93,7 +92,8 @@ export default class Queue extends EventEmitter {
 
     async play() {
         const track = this.getCurrent();
-        if (!track) return;
+        if (!track || this.destroyed) return;
+        this.emit("trackStart", this.current);
         const res = await stream(track.url);
         this.player.play(createAudioResource(res.stream, { inputType: res.type }), track.durationMilliseconds || 0);
     }
@@ -104,9 +104,10 @@ export default class Queue extends EventEmitter {
         this.play();
     }
 
-    destroy() {
+    destroy(reason:string) {
         this.connection.destroy();
-        this.emit("destroyed", this.current);
+        this.destroyed = true;
+        this.emit("destroyed", this.current, reason);
     }
 
     clearQueue() {

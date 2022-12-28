@@ -44,12 +44,10 @@ export default class Queue extends EventEmitter {
 
     pause(): void {
         this.player.pause();
-        this.emit("paused", this.current);
     }
 
     resume(): void {
         this.player.unpause();
-        this.emit("resumed", this.current);
     }
 
     async addTrack(query: string, channel: TextChannel, user: User) {
@@ -100,7 +98,6 @@ export default class Queue extends EventEmitter {
     }
 
     skip() {
-        this.emit("skipped", this.current, this.tracks[0]);
         this.finished();
         this.play();
     }

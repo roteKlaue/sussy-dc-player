@@ -61,7 +61,7 @@ export default class Player extends EventEmitter {
         const queue = new Queue(guild, voiceChannel.id, this.client);
         this.queues.set(guild.id, queue);
 
-        const events = ["skipped", "paused", "resumed", "error", "trackStart", "trackEnd", "addedTrack", "removedTrack", "noTrackFound"];
+        const events = ["error", "trackStart", "trackEnd", "addedTrack", "noTrackFound"];
 
         events.forEach(event => {
             queue.on(event, (...args) =>
@@ -80,8 +80,8 @@ export default class Player extends EventEmitter {
         return queue;
     }
 
-    public play(queue: Queue, query: string, channel: TextChannel, user: User) {
-        queue.addTrack(query, channel, user);
+    public async play(queue: Queue, query: string, channel: TextChannel, user: User) {
+        await queue.addTrack(query, channel, user);
         if (!queue.getPlaying()) queue.play();
     }
 
@@ -99,5 +99,9 @@ export default class Player extends EventEmitter {
 
     public toggleLoop(queue: Queue) {
         queue.toggleLoop();
+    }
+
+    public stop(queue: Queue) {
+        queue.destroy("🖐 | Leaving channel.");
     }
 }

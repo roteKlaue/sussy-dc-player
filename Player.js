@@ -34,7 +34,7 @@ module.exports = class {
     }
 
     getCreateQueue(guild, voicechannel) {
-        return this.getQueue(guild.id) || this.createQueue(guild, voicechannel);
+        return this.getQueue(guild) || this.createQueue(guild, voicechannel);
     }
 
     handleButtonInteraction(e) {

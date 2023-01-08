@@ -12,5 +12,5 @@ module.exports = {
         Danger: "DANGER",
         Link: "LINK",
     },
-    intens: IntentsBitField || Intents
+    intents: IntentsBitField || Intents
 };

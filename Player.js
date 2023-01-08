@@ -3,11 +3,11 @@ const { intents } = require("./builders");
 const Queue = require("./Queue");
 
 module.exports = class {
-    constructor(options) {
+    constructor(options = {}) {
         this.queues = new Collection();
         this.options = options;
 
-        if (this.client?.options?.intents && !new intents(this.client?.options?.intents).has(intents.Flags.GuildVoiceStates)) {
+        if (this.options.client?.options?.intents && !new intents(this.options.client?.options?.intents).has(intents.Flags.GuildVoiceStates)) {
             throw new Error('"GuildVoiceStates" intent is missing');
         }
 

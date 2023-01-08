@@ -52,13 +52,13 @@ client.on("messageCreate", (message) => {
     if (!command) return;
 
     if (command === "play") {
-        const queue = client.player.getCreateQueue(message.guild, message.member.voice.channel);
+        const queue = player.getCreateQueue(message.guild, message.member.voice.channel);
         queue.addTrack(args.join(" ").trim(), message.author, message.channel);
         message.channel.send(`Loading track for: ${args.join(" ")}`);
     }
 
     if(command === "loop") {
-        const queue = client.player.getQueue(message.guild);
+        const queue = player.getQueue(message.guild);
         if(!queue) return message.channel.send("❌ | There is currently no music running.");
         queue.toggleLoop();
         message.channel.send(`✅ | Looping ${queue.loop? "enabled":"disabled"}.`);

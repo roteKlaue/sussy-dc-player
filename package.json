@@ -27,5 +27,17 @@
     "yt-search": "^2.10.3",
     "yt-stream": "^1.4.0",
     "ytdl-core": "^4.11.2"
-  }
+  },
+  "directories": {
+    "example": "example"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/roteKlaue/sussy-dc-player.git"
+  },
+  "bugs": {
+    "url": "https://github.com/roteKlaue/sussy-dc-player/issues"
+  },
+  "homepage": "https://github.com/roteKlaue/sussy-dc-player#readme"
 }

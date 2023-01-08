@@ -72,4 +72,4 @@ client.on("ready", () => {
 client.login(config.token);
 ```
 
-A bigger Example can be found here: https://github.com/roteKlaue/sussy-dc-player/example/index.js
+A bigger Example can be found here: https://github.com/roteKlaue/sussy-dc-player/blob/master/example/index.js

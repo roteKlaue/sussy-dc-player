@@ -141,7 +141,7 @@ module.exports = class extends EventEmitter {
         this.#updateButtons(true);
 
         if (next) {
-            interaction.reply(":white_check_mark: | Skipped last track.");
+            interaction.reply(":white_check_mark: | Skipped track.");
             this.current = next;
             return this.#play(this.current);
         }

@@ -43,6 +43,8 @@ module.exports = class extends EventEmitter {
             this.#play(this.current);
         }
 
+        track.load();
+
         return track;
     }
 
@@ -58,8 +60,7 @@ module.exports = class extends EventEmitter {
         this.player.once(AudioPlayerStatus.Idle, () => {
             this.#updateButtons(true);
             if (this.loop) this.queue.push(track);
-            this.current = this.queue.shift();
-            if (!this.current) {
+            if (!this.queue.toArray().length == 0) {
                 this.playing = false;
                 if (this.options.leaveOnQueueEnd) {
                     track.channel.send("🖐 | Played all tracks leaving the channel.");
@@ -67,6 +68,7 @@ module.exports = class extends EventEmitter {
                 }
                 return track.channel.send("🖐 | Played all tracks.");;
             }
+            this.current = this.queue.shift();
             this.#play(this.current);
         });
 

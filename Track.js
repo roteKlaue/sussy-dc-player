@@ -4,6 +4,7 @@ const ytinfo = require("yt-stream");
 
 module.exports = class {
     constructor(url, user, channel) {
+        this.loaded = false;
         this.url = url;
         this.user = user;
         this.channel = channel;
@@ -15,6 +16,7 @@ module.exports = class {
 
     async load() {
         const info = await ytinfo.getInfo(this.url);
+        this.loaded = true;
         this.title = info.title;
         this.description = StringUtil.shorten(info.description, 200, 3);
         this.length = info.duration;
@@ -22,7 +24,7 @@ module.exports = class {
     }
 
     async createEmbed() {
-        if (!this.title) {
+        if (!this.loaded) {
             await this.load();
         }
 

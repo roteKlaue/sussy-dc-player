@@ -1,8 +1,7 @@
 const { joinVoiceChannel, AudioPlayer, NoSubscriberBehavior, createAudioResource, AudioPlayerStatus } = require("@discordjs/voice");
 const { actionRow, button, style } = require("./builders");
-const { ImprovedArray, StringUtil } = require("sussy-util");
+const { StringUtil, Queue } = require("sussy-util");
 const EventEmitter = require("node:events");
-const ytstream = require("yt-stream");
 const search = require("yt-search");
 const ytdl = require("ytdl-core");
 const Track = require("./Track");
@@ -15,7 +14,7 @@ module.exports = class extends EventEmitter {
         this.connection = joinVoiceChannel({ channelId: voicechannel.id, guildId: guild.id, adapterCreator: guild.voiceAdapterCreator });
         this.player = new AudioPlayer({ behaviors: { noSubscriber: NoSubscriberBehavior.Pause } });
         this.connection.subscribe(this.player);
-        this.queue = new ImprovedArray();
+        this.queue = new Queue([]);
         this.channelId = voicechannel.id;
         this.playing = false;
         this.message = null;
@@ -25,7 +24,7 @@ module.exports = class extends EventEmitter {
     }
 
     async addTrack(query, user, channel) {
-        if (!ytstream.validateURL(query)) {
+        if (!ytdl.validateURL(query)) {
             const res = await search.search(query);
             query = res.videos[0].url;
         }
@@ -72,7 +71,7 @@ module.exports = class extends EventEmitter {
 
         this.player.play(res);
         this.message = await track.channel.send({ embeds: [await track.createEmbed()] });
-        this.#updateButtons();
+        if(this.options.buttons) this.#updateButtons();
     }
 
     #destroy() {
@@ -197,7 +196,7 @@ module.exports = class extends EventEmitter {
             return messInter.reply("Currently not playing.");
         }
         await messInter.reply(`Currently playing: ${this.current.title}`);
-        if (this.queue.length) messInter.channel.send(this.queue.map((e, i) => `${StringUtil.rpad(`${i + 1}`, 2, " ")}. **${e.title}**`).join("\n"));
+        if (this.queue.toArray().length) messInter.channel.send(this.queue.toArray().map((e, i) => `${StringUtil.rpad(`${i + 1}`, 2, " ")}. **${e.title}**`).join("\n"));
     }
 
     looperdooper(interaction) {

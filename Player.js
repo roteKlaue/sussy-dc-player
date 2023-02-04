@@ -38,6 +38,7 @@ module.exports = class {
     }
 
     handleButtonInteraction(e) {
+        if(!this.options.buttons) return;
         const { guildId, customId } = e;
         this.queues.get(guildId)?.handleButtonInteraction(customId, e);
     }

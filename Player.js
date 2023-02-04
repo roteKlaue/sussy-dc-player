@@ -11,11 +11,11 @@ module.exports = class {
             throw new Error('"GuildVoiceStates" intent is missing');
         }
 
-        options.client.on("voiceStateUpdate", this._handleVoiceStateChange.bind(this));
+        options.client.on("voiceStateUpdate", this.#_handleVoiceStateChange.bind(this));
         
         options.client.on("interactionCreate", (e) => {
             if(e.isButton()) {
-                this.handleButtonInteraction(e);
+                this.#_handleButtonInteraction(e);
             }
         });
     }
@@ -37,13 +37,13 @@ module.exports = class {
         return this.getQueue(guild) || this.createQueue(guild, voicechannel);
     }
 
-    handleButtonInteraction(e) {
+    #_handleButtonInteraction(e) {
         if(!this.options.buttons) return;
         const { guildId, customId } = e;
         this.queues.get(guildId)?.handleButtonInteraction(customId, e);
     }
 
-    _handleVoiceStateChange(oldState, newState) {
+    #_handleVoiceStateChange(oldState, newState) {
         if (!oldState.guild || !this.queues.has(oldState.guild.id)) return;
         const queue = this.queues.get(oldState.guild.id);
 

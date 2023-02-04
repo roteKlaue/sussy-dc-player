@@ -13,12 +13,18 @@ module.exports = class extends EventEmitter {
         this.guildId = guild.id;
         this.connection = joinVoiceChannel({ channelId: voicechannel.id, guildId: guild.id, adapterCreator: guild.voiceAdapterCreator });
         this.player = new AudioPlayer({ behaviors: { noSubscriber: NoSubscriberBehavior.Pause } });
+        this.player.once("error", (err) => {
+            this.#updateButtons(true);
+            this.playing = false;
+            this.current = void 0;
+            this.#destroy();
+        });
         this.connection.subscribe(this.player);
         this.queue = new Queue([]);
         this.channelId = voicechannel.id;
         this.playing = false;
-        this.message = null;
-        this.current = null;
+        this.message = void 0;
+        this.current = void 0;
         this.paused = false;
         this.loop = false;
     }
@@ -30,10 +36,9 @@ module.exports = class extends EventEmitter {
         }
 
         const track = new Track(query, user, channel);
-        await track.load();
         this.queue.push(track);
 
-        if (!this.playing) {
+        if (!this.current) {
             this.current = this.queue.shift();
             this.#play(this.current);
         }
@@ -43,16 +48,12 @@ module.exports = class extends EventEmitter {
 
     toggleLoop() {
         this.loop = !this.loop;
+        this.#updateButtons();
     }
 
     async #play(track) {
         this.paused = false;
         this.playing = true;
-        this.player.on("error", (err) => {
-            this.#updateButtons(true);
-            this.playing = false;
-            this.#destroy();
-        });
 
         this.player.once(AudioPlayerStatus.Idle, () => {
             this.#updateButtons(true);
@@ -60,9 +61,11 @@ module.exports = class extends EventEmitter {
             this.current = this.queue.shift();
             if (!this.current) {
                 this.playing = false;
-                track.channel.send("🖐 | Played all tracks leaving the channel.");
-                if (this.options.leaveOnQueueEnd) return this.#destroy();
-                return;
+                if (this.options.leaveOnQueueEnd) {
+                    track.channel.send("🖐 | Played all tracks leaving the channel.");
+                    return this.#destroy();
+                }
+                return track.channel.send("🖐 | Played all tracks.");;
             }
             this.#play(this.current);
         });
@@ -71,7 +74,7 @@ module.exports = class extends EventEmitter {
 
         this.player.play(res);
         this.message = await track.channel.send({ embeds: [await track.createEmbed()] });
-        if(this.options.buttons) this.#updateButtons();
+        if (this.options.buttons) this.#updateButtons();
     }
 
     #destroy() {
